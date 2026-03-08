@@ -1,0 +1,117 @@
+
+task - Connect to remote linux machine and fetch the content of the log file /tmp/infra.log. check what all email address available in the log file and print it
+
+file name : email_extract.yml
+
+---
+- name: Emails Extract from log files
+  hosts: servers
+  gather_facts: no
+
+  tasks:
+    - name: Read log files
+      slurp:
+        src: /tmp/infra.log
+      register: log_data
+
+    - name: Decode log content
+      set_fact:
+        decode_content: "{{ log_data.content | b64decode }}"
+
+    - name: Extract email using regex
+      set_fact:
+        emails: "{{ decode_content | regex_findall('[a-z0-9]+@+[a-z]+\\.[a-z]{2,}') }}"   #  "{{ decode_content | regex_findall ('[a-z0-9]+@gmail\\.com') }}" (only for gamil.com)
+
+    - name: Remove Duplicates and sort
+      set_fact:
+        unique_emails: "{{ emails | unique | sort }}"
+
+    - name: Print emails
+      debug:
+        var: unique_emails
+
+
+
+
+ Tumhare liye ek challenge
+
+Ab next level try karo:
+
+👉 Task:
+
+Sirf gmail nahi, sab emails extract karo
+
+Phir unhe domain-wise group karo  
+
+Example output:
+
+gmail.com:
+  - a@gmail.com
+  - b@gmail.com
+yahoo.com:
+  - x@yahoo.com
+
+👉 Task: output ek alag file m bhi rakh sakte ho
+
+
+
+
+
+
+
+
+--------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+task - Connect to the remote linux machine and identify all filesystems whose disk utilization is greater than 80%
+
+file name : check_disk_usage.yml
+
+---
+- name: Identify high disk utilization on remote Linux machines
+  hosts: all
+  gather_facts: no
+
+  tasks:
+    - name: Run df command to get disk usage
+      command: df -h
+      register: disk_usage
+
+    - name: Show file systems with >80% usage
+      debug:
+        msg: "High disk usage: {{ item }}"
+      loop: "{{ disk_usage.stdout_lines[1:] }}"   # skip header line
+      when: item.split()[4].rstrip('%') | int > 80    # condition check kr k output observe karo (int < 44)
+
+
+
+
+next opitimazation idea : iska pretty report version bana sakte ho
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
