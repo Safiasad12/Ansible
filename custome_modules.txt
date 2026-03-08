@@ -316,5 +316,16 @@ next suggestion :
 
 note : custome module temprarily target machine p copy hota h or execute bhi wahi se output fir controller p aata h.
 
+note : 4 tarike se call kr sakte ho, 1. by group(eg. servers), 2. all(foll all groups) alias 3. name(eg. vm), or last 4. local host jisme same controller node m playbook execute hoti h
+       matlab ansible-playbook k hosts ko in 4 ways se define kr sakte ho
+
+inventory.ini
+
+[servers]
+vm ansible_host=192.168.1.13 ansible_user=safi ansible_ssh_password=Safi*1234 
+
+isme vm-> alias name h, is 192.168.1.13 ip ka
+[servers] group h
+
 
 
