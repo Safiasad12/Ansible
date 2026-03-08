@@ -1,0 +1,320 @@
+#!/usr/bin/python
+
+from ansible.module_utils.basic import AnsibleModule
+
+def run_module():
+
+    module_args = dict(
+        path=dict(type='str', required=True),
+        content=dict(type='str', required=True)
+    )
+
+    module = AnsibleModule(argument_spec=module_args)
+
+    path = module.params['path']
+    content = module.params['content']
+
+    try:
+        with open(path, "w") as f:
+            f.write(content)
+
+        module.exit_json(
+            changed=True,
+            message="File created successfully",
+            path=path
+        )
+
+    except Exception as e:
+        module.fail_json(msg=str(e))
+
+
+def main():
+    run_module()
+
+if __name__ == '__main__':
+    main()
+
+
+
+
+
+
+
+
+---
+- name: Test custom module
+  hosts: localhost
+  gather_facts: no
+
+  tasks:
+
+    - name: Create file using custom module
+      create_file:
+        path: /tmp/test.txt
+        content: "Hello Safi"
+
+
+
+
+
+
+
+
+
+
+
+----------------------------------------------------------------
+
+
+
+
+from ansible.module_utils.basic import AnsibleModule
+import os
+
+def run_module():
+
+    module_args = dict(
+        path=dict(type='str', required=True)
+    )
+
+    module = AnsibleModule(argument_spec=module_args)
+
+    path = module.params['path']
+
+    if os.path.exists(path):
+
+        module.exit_json(
+            changed=False,
+            exists=True,
+            msg="File exists",
+            path=path
+        )
+
+    else:
+
+        module.exit_json(
+            changed=False,
+            exists=False,
+            msg="File does not exist",
+            path=path
+        )
+
+
+def main():
+    run_module()
+
+if __name__ == '__main__':
+    main()
+
+
+
+
+
+
+
+---
+- name: Check file module test
+  hosts: localhost
+  gather_facts: no
+
+  tasks:
+
+    - name: Check if file exists
+      check_file:
+        path: /tmp/test.txt
+      register: result
+
+    - name: Print result
+      debug:
+        var: result
+
+
+
+
+
+
+
+
+--------------------------------------------------------------------
+
+
+
+1️⃣ Log file parser module
+
+
+# log_parser.py
+
+from ansible.module_utils.basic import AnsibleModule
+
+def run_module():
+
+    module_args = dict(
+        path=dict(type='str', required=True),
+        keyword=dict(type='str', required=True)
+    )
+
+    module = AnsibleModule(argument_spec=module_args)
+
+    path = module.params['path']
+    keyword = module.params['keyword']
+
+    try:
+
+        count = 0
+
+        with open(path, "r") as f:
+            for line in f:
+                if keyword in line:
+                    count += 1
+
+        module.exit_json(
+            changed=False,
+            keyword=keyword,
+            occurrences=count,
+            msg="Log parsed successfully"
+        )
+
+    except Exception as e:
+        module.fail_json(msg=str(e))
+
+
+def main():
+    run_module()
+
+if __name__ == '__main__':
+    main()
+
+
+
+
+
+
+
+# /tmp/app.log (sample log file)
+
+
+INFO Server started
+ERROR Database connection failed
+INFO Request received
+ERROR Timeout occurred
+WARNING Disk space low
+
+
+
+
+
+
+---
+- name: Parse log file
+  hosts: localhost
+  gather_facts: no
+
+  tasks:
+
+    - name: Count ERROR in log file
+      log_parser:
+        path: /tmp/app.log
+        keyword: ERROR
+      register: log_result
+
+    - name: Show result
+      debug:
+        var: log_result
+
+
+
+
+
+------------------------------------------------------------------------
+
+
+
+
+
+# api_call.py (ye file library folder m hoti h)
+
+from ansible.module_utils.basic import AnsibleModule
+import requests
+
+def run_module():
+
+    module_args = dict(
+        name=dict(type='str', required=True)
+    )
+
+    module = AnsibleModule(argument_spec=module_args)
+
+    name = module.params['name']
+
+    try:
+
+        url = f"https://api.agify.io/?name={name}"
+
+        response = requests.get(url)
+
+        data = response.json()
+
+        module.exit_json(
+            changed=False,
+            name=data.get("name"),
+            predicted_age=data.get("age"),
+            count=data.get("count"),
+            msg="API call successful"
+        )
+
+    except Exception as e:
+        module.fail_json(msg=str(e))
+
+
+def main():
+    run_module()
+
+
+
+
+
+
+# api_playbook.yml
+
+---
+- name: API Call Example
+  hosts: vm
+  gather_facts: no
+
+  tasks:
+
+    - name: Predict age using API
+      api_call:
+        name: safi
+      register: api_result
+
+    - name: Show API result
+      debug:
+        var: api_result
+
+
+
+
+
+
+
+------------------------------------------------------------------------
+
+
+
+
+
+next suggestion :
+
+1️⃣ Log file parser module
+2️⃣ API calling module
+3️⃣ User existence check module
+
+
+
+
+
+note : custome module temprarily target machine p copy hota h or execute bhi wahi se output fir controller p aata h.
+
+
+
