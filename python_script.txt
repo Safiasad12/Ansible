@@ -1,0 +1,78 @@
+
+task - Connect to remote linux machine and fetch the content of the log file /tmp/infra.log. check what all email address available in the log file and print it
+
+
+import paramiko
+import re
+
+hostname = "192.168.1.33"
+username = "safi"
+password = "Safi*1234"
+
+log_file = "/tmp/log/infra.log"
+
+ssh = paramiko.SSHClient()
+ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+ssh.connect(hostname, username=username, password=password)
+
+stdin, stdout, stderr = ssh.exec_command(f"cat {log_file}")
+log_content = stdout.read().decode()
+
+error = stderr.read().decode()
+print("ERROR:", error)
+
+print("LOG CONTENT:\n", log_content)
+
+email_pattern = r"[A-Za-z0-9%+-_.]+@[A-Za-z0-9.-]+\.+[A-za-z]{2,}"
+
+emails = set(re.findall(email_pattern, log_content))
+
+if emails:
+    print("Email addresses found:")
+    for email in emails:
+        print(email)
+else:
+    print("No email addresses found in log file")
+
+
+
+
+
+
+--------------------------------------------------------------------------------------
+
+
+Connect to the remote linux machine and identify all filesystems whose disk utilization is greater than 80%
+
+
+import paramiko
+
+hostname="192.168.1.13"
+username="safi"
+password="Safi*1234"
+
+ssh=paramiko.SSHClient()
+ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+ssh.connect(hostname, username=username, password=password)
+
+stdin, stdout, stderr = ssh.exec_command("df -h")
+
+content = stdout.read().decode().split('\n')
+
+result = {}
+
+for line in content[1:]:
+    
+    if not line:
+        continue
+        
+    parts = line.split()
+    
+    use_percentage = int(parts[4].rstrip('%'))
+    
+    if use_percentage > 80:
+        filesystem = parts[0]
+        result[filesystem] = use_percentage
+
+print(result)
+
